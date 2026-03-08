@@ -38,22 +38,18 @@ src/
 The reflow engine processes work orders in four stages:
 
 ### 1. Blocked Window Construction
-
 Before scheduling begins, the engine builds a blocked time map per work center by combining:
-
 - Static maintenance windows defined on the work center
 - Maintenance work orders (`isMaintenance: true`), which are treated as immovable blocked intervals
 
 Blocked intervals are then sorted by start time and validated for overlaps — overlapping blocks throw an explicit error identifying both sources.
 
 ### 2. Dependency Graph & Topological Sort (DAG)
-
 Work order dependencies are modeled as a Directed Acyclic Graph. Kahn's algorithm produces a topological ordering, guaranteeing every parent work order is scheduled before any of its children. Circular dependencies and missing parent references both throw explicit errors immediately.
 
 The queue is re-sorted by original start time whenever new nodes become ready, making output deterministic across runs.
 
 ### 3. Earliest Start Calculation
-
 For each work order in topological order, the engine computes the earliest valid start time as the maximum of three constraints:
 
 - **Original start date** — work orders are never pulled earlier than planned (stability heuristic)
@@ -61,14 +57,12 @@ For each work order in topological order, the engine computes the earliest valid
 - **Work center availability** — the machine must be free from the previous work order
 
 ### 4. Shift & Maintenance Aware Placement
-
 Two core date utilities handle the real complexity:
 
 - `nextWorkingInstant` — snaps a candidate time forward to the next valid working moment, skipping blocked windows and non-shift hours
 - `addWorkingMinutes` — walks forward through the calendar consuming only working minutes, pausing at shift boundaries and maintenance blocks, resuming at the next valid slot
 
 **Example:** A 120-minute work order starting Monday at 4PM (shift ends 5PM):
-
 - Works 60 minutes Monday 4PM–5PM
 - Pauses overnight
 - Resumes Tuesday 8AM
@@ -78,14 +72,14 @@ Two core date utilities handle the real complexity:
 
 ## Work Centers
 
-| ID    | Shift Hours                  | Maintenance      |
-| ----- | ---------------------------- | ---------------- |
-| TX320 | Mon–Fri 8AM–5PM              | Wed 12PM–2PM     |
-| FX240 | Mon–Fri 7AM–4PM              | None             |
-| PZ510 | Mon–Fri 9AM–6PM              | Thu 10AM–11:30AM |
-| KX100 | Mon–Fri 6AM–2PM              | Fri 6AM–7AM      |
-| MZ750 | Mon–Fri 10AM–7PM             | None             |
-| RQ430 | Mon–Fri 8AM–4PM, Sat 9AM–1PM | Sat 2PM–4PM      |
+| ID    | Shift Hours              | Maintenance |
+|-------|--------------------------|-------------|
+| TX320 | Mon–Fri 8AM–5PM          | Wed 12PM–2PM |
+| FX240 | Mon–Fri 7AM–4PM          | None |
+| PZ510 | Mon–Fri 9AM–6PM          | Thu 10AM–11:30AM |
+| KX100 | Mon–Fri 6AM–2PM          | Fri 6AM–7AM |
+| MZ750 | Mon–Fri 10AM–7PM         | None |
+| RQ430 | Mon–Fri 8AM–4PM, Sat 9AM–1PM | Sat 2PM–4PM |
 
 ---
 
@@ -150,7 +144,6 @@ Two work orders that depend on each other trigger a clear error immediately.
 ```
 
 Each change record:
-
 ```typescript
 {
   workOrderId: string;
