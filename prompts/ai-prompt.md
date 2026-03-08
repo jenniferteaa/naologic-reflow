@@ -1,0 +1,19 @@
+- We will be using topo sort for the scheduling. This will include building an adjacency list, calculating the in-degree, and applying Kahn's algorithm to detect cycles. Given the specs, implement this logic.
+- Are the orders given in a batch?
+- Are the work order maintenance windows different from the work center's maintenance windows?
+- I want the code to throw an error when 2 work order maintenance windows coincide, because they cannot be moved according to the specs. Can this be implemented?
+- The same goes for conflicts between work order maintenances and work center maintenances on the same resource.
+- Can you put the test data in a separate file and then pass it into the service?
+- Can the constraint checking logic be moved from reflow.service.ts to constraint-checker.ts?
+- Wire the constraint-checker.ts functions into reflow.service.ts.
+- In sample-data.ts, can you check if the start and end time window is greater than the durationMinutes for a few cases?
+- Can you also print the work order IDs that caused the error in the error messages? The same goes for conflicts between maintenance work orders and work center maintenance windows.
+- Add Luxon type support for the new fields.
+
+- Implement Jest test cases for the following:
+  - The code should reschedule remaining work orders if one is delayed.
+  - A work order is properly split and resumes if a maintenance window falls in between.
+  - If a work order spills out of a shift window for a given day, it should resume at the next day's first available shift.
+  - Detect cyclic dependencies among work orders.
+  - Throw an error if there are conflicts between two work order maintenance windows.
+  - Throw an error if there are conflicts between a work order maintenance window and a work center maintenance window.
