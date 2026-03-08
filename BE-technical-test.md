@@ -17,18 +17,21 @@ You are tasked with building a production schedule reflow system for a manufactu
 **What you're building:** A production scheduler that reschedules work orders when disruptions occur
 
 **Must handle:**
+
 - Dependencies (A must finish before B)
 - Work center conflicts (no overlaps)
 - Shift boundaries (work pauses outside shifts)
 - Maintenance windows (blocked time)
 
 **Required deliverables:**
+
 1. Working algorithm (TypeScript)
 2. Sample data (3+ scenarios)
 3. Loom demo (5-10 min)
 4. GitHub repo with README
 
 **Bonus (optional):**
+
 - Automated test suite
 - More sample data
 - DAG implementation
@@ -54,16 +57,19 @@ Your job is to create a **reflow algorithm**. A reflow algorithm will look at al
 ### 1. The Reflow Algorithm
 
 **Takes:**
+
 - Work orders with start/end dates
 - Work centers with shifts and maintenance windows
 - Dependencies between orders
 
 **Produces:**
+
 - Valid schedule with updated dates
 - List of changes (what moved, by how much)
 - Explanation (why it changed)
 
 **Key Rules:**
+
 - Work orders take their full `durationMinutes` to complete
 - Work pauses outside shift hours, resumes in next shift
 - No work during maintenance windows
@@ -77,15 +83,18 @@ Your job is to create a **reflow algorithm**. A reflow algorithm will look at al
 Your algorithm MUST respect:
 
 **Work Center:**
+
 - Only one order at a time (no overlaps)
 - Respect shift schedules
 - No work during maintenance windows
 
 **Dependencies:**
+
 - Multiple parents allowed (all must complete first)
 - Can form chains (A → B → C)
 
 **Time:**
+
 - Work only during shift hours
 - Maintenance windows cannot be changed
 - Maintenance work orders cannot be rescheduled
@@ -93,6 +102,7 @@ Your algorithm MUST respect:
 ### 3. Goal
 
 **Produce a valid schedule** where:
+
 - No work center conflicts
 - All dependencies satisfied
 - All work within shift hours
@@ -101,10 +111,11 @@ Your algorithm MUST respect:
 ## Data Structures
 
 All documents follow this structure:
+
 ```typescript
 {
-  docId: string;        // Unique identifier
-  docType: string;      // Document type
+  docId: string; // Unique identifier
+  docType: string; // Document type
   data: {
     // Document-specific fields
   }
@@ -112,6 +123,7 @@ All documents follow this structure:
 ```
 
 ### Work Order
+
 ```typescript
 {
   docId: string;
@@ -120,15 +132,15 @@ All documents follow this structure:
     workOrderNumber: string;
     manufacturingOrderId: string;
     workCenterId: string;
-    
+
     // Timing
-    startDate: string;              
-    endDate: string;                
+    startDate: string;
+    endDate: string;
     durationMinutes: number;        // Total working time required
-    
+
     // Constraints
     isMaintenance: boolean;         // Cannot be rescheduled if true
-    
+
     // Dependencies (can have multiple parents)
     dependsOnWorkOrderIds: string[]; // All must complete before this starts
   }
@@ -136,31 +148,33 @@ All documents follow this structure:
 ```
 
 ### Work Center
+
 ```typescript
 {
   docId: string;
   docType: "workCenter";
   data: {
     name: string;
-    
+
     // Shifts
     shifts: Array<{
-      dayOfWeek: number;           // 0-6, Sunday = 0
-      startHour: number;           // 0-23
-      endHour: number;             // 0-23
+      dayOfWeek: number; // 0-6, Sunday = 0
+      startHour: number; // 0-23
+      endHour: number; // 0-23
     }>;
-    
+
     // Maintenance windows (blocked time periods)
     maintenanceWindows: Array<{
-      startDate: string;           
-      endDate: string;             
-      reason?: string;             // Optional description
+      startDate: string;
+      endDate: string;
+      reason?: string; // Optional description
     }>;
   }
 }
 ```
 
 ### Manufacturing Order
+
 ```typescript
 {
   docId: string;
@@ -169,7 +183,7 @@ All documents follow this structure:
     manufacturingOrderNumber: string;
     itemId: string;
     quantity: number;
-    dueDate: string;               
+    dueDate: string;
   }
 }
 ```
@@ -179,12 +193,14 @@ All documents follow this structure:
 ### 1. Working Algorithm (Required)
 
 Build the reflow scheduler that handles:
+
 - Dependencies (multiple parents)
 - Work center conflicts
 - Shift boundaries (pause/resume)
 - Maintenance windows
 
 Suggested structure:
+
 ```
 src/
 ├── reflow/
@@ -215,6 +231,7 @@ Can be hardcoded or in JSON files. Just needs to demonstrate your algorithm work
 ### 4. Demo Video (Required)
 
 **5-10-minute Loom video** showing:
+
 - Your code running with sample data
 - Output for both scenarios (what changed, why)
 - Walkthrough of your algorithm approach
@@ -222,6 +239,7 @@ Can be hardcoded or in JSON files. Just needs to demonstrate your algorithm work
 ### 5. Public Repository (Required)
 
 **GitHub/GitLab repo** with:
+
 - Working code (runnable)
 - Sample data
 - README
@@ -276,6 +294,7 @@ If you finish early or want to showcase advanced capabilities:
 Your submission will be evaluated on:
 
 ### Algorithm Correctness (80%)
+
 - **Constraint Satisfaction (40%)**: Respects ALL hard constraints
   - Work center conflicts (no overlaps)
   - Dependencies (all parents complete before child)
@@ -289,6 +308,7 @@ Your submission will be evaluated on:
 - **Handles Required Scenarios (10%)**: At least 2 scenarios demonstrated
 
 ### Problem Solving (20%)
+
 - **Code Quality (10%)**:
   - Clean, readable TypeScript with proper types
   - Good separation of concerns
@@ -302,6 +322,7 @@ Your submission will be evaluated on:
   - Good documentation
 
 ### Bonus Points (Extra Credit)
+
 - Automated test suite (highly valued)
 - DAG implementation with cycle detection
 - Setup time handling
@@ -314,6 +335,7 @@ Your submission will be evaluated on:
 ## Hints & Tips
 
 **Start simple, add complexity gradually:**
+
 1. Get basic reflow working (ignore shifts)
 2. Add dependencies
 3. Add work center conflicts
@@ -321,6 +343,7 @@ Your submission will be evaluated on:
 5. Add maintenance windows
 
 **Shift logic is the trickiest part:**
+
 - Use **Luxon** for date manipulation (strongly recommended)
 - Create helper: `calculateEndDateWithShifts(startDate, duration, shifts)`
 - Remember: work pauses outside shifts, resumes in next shift
@@ -329,6 +352,7 @@ Your submission will be evaluated on:
 Dependencies → Work Center Conflicts → Shifts → Maintenance
 
 **Key considerations:**
+
 - All dates in UTC
 - Track working minutes, not elapsed time
 - Maintenance windows = blocked time on work centers
@@ -343,6 +367,7 @@ A: Yes! Luxon is highly recommended for date handling.
 
 **Q: How should work orders span across shifts?**  
 A: They pause during non-working hours and resume in the next shift.
+
 - Example: 120-min order starts Mon 4PM, shift ends 5PM (Mon-Fri 8AM-5PM)
 - Works 60 min Monday → pauses → resumes Tue 8AM → completes 9AM
 
@@ -355,11 +380,14 @@ A: Submit what you have! A working core solution is better than an incomplete on
 ## Submission
 
 Provide:
+
 1. **Public GitHub/GitLab repository** with:
-  - Working code (TypeScript)
-  - Sample data for 3+ scenarios
-  - README with setup and approach
-  - Clean commit history
+
+- Working code (TypeScript)
+- Sample data for 3+ scenarios
+- README with setup and approach
+- Clean commit history
+
 2. **Loom video** (max 10 minutes) demonstrating your solution
 3. **(Bonus)** Automated test suite
 4. **(Bonus)** Markdown files with AI prompts you used
@@ -384,15 +412,8 @@ console.log(result.changes);             // What changed
 console.log(result.explanation);         // Why it changed
 ```
 
-
 ---
-
 
 **Good luck! We're excited to see your solution.** 🚀
 
 **Naologic Team**
-
-
-
-
-
