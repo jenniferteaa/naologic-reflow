@@ -131,6 +131,12 @@ A work order starting late in the day runs out of shift hours and spills into th
 **Scenario 4 — Circular Dependency Detection**
 Two work orders that depend on each other trigger a clear error immediately.
 
+**Scenario 5 — Maintenance Window vs Maintenance Work Order Overlap**
+A maintenance work order whose time overlaps with a static maintenance window on the same work center throws an explicit error identifying both sources by type and ID.
+
+**Scenario 6 — Maintenance Work Order vs Maintenance Work Order Overlap**
+Two maintenance work orders on the same work center whose times overlap throw an explicit error identifying both conflicting work order IDs.
+
 ---
 
 ## Output Format
