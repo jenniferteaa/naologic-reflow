@@ -7,24 +7,37 @@ import {
   WorkCenterLike,
 } from "../utils/date-utils";
 import {
+  assertMaintenanceTiming,
+  assertWorkCentersExist,
+  topoSortWorkOrders,
+} from "./constraint-checker";
+import {
   ReflowInput,
   ReflowResult,
   WorkCenterDoc,
   WorkOrderChange,
   WorkOrderDoc,
 } from "./types";
-import {
-  assertMaintenanceTiming,
-  assertWorkCentersExist,
-  topoSortWorkOrders,
-} from "./constraint-checker";
 
-type IntervalBlock = {
-  start: DateTime;
-  end: DateTime;
-  reason?: string;
-  sourceType: "workCenterMaintenance" | "workOrderMaintenance";
-  sourceId: string;
+type IntervalBlock = WorkCenterLike["blocked"][number];
+
+const hasMaintenanceImpact = (
+  blocked: IntervalBlock[],
+  earliest: DateTime,
+  newStart: DateTime,
+  newEnd: DateTime,
+) => {
+  const earliestMs = earliest.toMillis();
+  const newStartMs = newStart.toMillis();
+  const newEndMs = newEnd.toMillis();
+  for (const b of blocked) {
+    const bStart = b.start.toMillis();
+    const bEnd = b.end.toMillis();
+    if (bStart <= earliestMs && earliestMs < bEnd) return true;
+    if (bStart < newEndMs && bEnd > newStartMs) return true;
+    if (earliestMs < bStart && bStart < newStartMs) return true;
+  }
+  return false;
 };
 
 // @upgrade: tie-breaking logic for same-start-time work orders
@@ -47,7 +60,7 @@ export class ReflowService {
 
     // --- Build blocked windows per work center (maintenanceWindows + fixed maintenance work orders)
     // maintenanceWindows blocked on the work centers
-    const wcRuntime = new Map<string, WorkCenterLike>();
+    const wcRuntime = new Map<string, WorkCenterLike>(); // workcenter
     for (const wc of workCenters) {
       const blocked: IntervalBlock[] = [];
 
@@ -141,6 +154,7 @@ export class ReflowService {
       }
 
       // Fixed maintenance work orders do not move
+      // If one has a dependency that finishes late, we throw an error.
       if (wo.data.isMaintenance) {
         if (parentMaxEnd) {
           assertMaintenanceTiming(
@@ -168,12 +182,12 @@ export class ReflowService {
       if (parentMaxEnd && parentMaxEnd > earliest) earliest = parentMaxEnd;
       if (wcFree > earliest) earliest = wcFree;
 
-      const newStart = nextWorkingInstant(wc, earliest);
+      const newStart = nextWorkingInstant(wc, earliest); // if within shift we're good, else get the earliest available
       const newEnd = addWorkingMinutes(wc, newStart, wo.data.durationMinutes);
 
       woStart.set(woId, newStart);
       woEnd.set(woId, newEnd);
-      wcNextFree.set(wcId, newEnd);
+      wcNextFree.set(wcId, newEnd); // for a given work center, the next free time is being set through each iteration.
 
       const moved =
         newStart.toMillis() !== oldStart.toMillis() ||
@@ -183,8 +197,10 @@ export class ReflowService {
         if (parentMaxEnd && parentMaxEnd > oldStart)
           reasonParts.push("dependency delay");
         if (wcFree > oldStart) reasonParts.push("work center conflict");
-        // shifts/maintenance are implicit; keep explanation simple
-        reasonParts.push("shift/maintenance constraints");
+        if (hasMaintenanceImpact(wc.blocked, earliest, newStart, newEnd)) {
+          reasonParts.push("maintenance window");
+        }
+        // reasonParts.push("maintenance constraints");
 
         changes.push({
           workOrderId: woId,

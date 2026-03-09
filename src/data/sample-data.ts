@@ -153,7 +153,7 @@ export const workOrders: WorkOrderDoc[] = [
       manufacturingOrderId: "MO1",
       workCenterId: "FX240",
       startDate: "2026-03-03T08:00:00Z",
-      endDate: "2026-03-03T10:00:00Z",
+      endDate: "2026-03-03T09:00:00Z",
       durationMinutes: 60,
       isMaintenance: false,
       dependsOnWorkOrderIds: [],

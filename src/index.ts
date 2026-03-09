@@ -1,4 +1,4 @@
-import largeWorkOrders from "./data/large-work-orders-fixed.json";
+//import largeWorkOrders from "./data/large-work-orders-fixed.json";
 import {
   manufacturingOrders,
   workCenters,
@@ -19,6 +19,9 @@ const runScenario = (label: string, workOrdersInput: WorkOrderDoc[]) => {
     });
     console.log(`Work orders processed: ${result.updatedWorkOrders.length}`);
     console.log(`Changes made: ${result.changes.length}`);
+    //console.log(result.updatedWorkOrders);
+    console.log(result.changes);
+    console.log(result.explanation);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.log(`Scenario failed: ${message}`);
@@ -27,4 +30,4 @@ const runScenario = (label: string, workOrdersInput: WorkOrderDoc[]) => {
 
 runScenario("Scenario 1: Small Dataset", workOrders);
 console.log("");
-runScenario("Scenario 2: Large Dataset", largeWorkOrders as WorkOrderDoc[]);
+//runScenario("Scenario 2: Large Dataset", largeWorkOrders as WorkOrderDoc[]);
